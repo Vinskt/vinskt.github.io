@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+    body {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      height: 100vh;
+      margin: 0;
+    }
+
+    .line-container {
+      display: flex;
+      overflow: hidden;
+      margin-bottom: 20px;
+    }
+
+    .line-item {
+      width: 50px;
+      height: 50px;
+      border: 1px solid #ccc;
+      background-color: #fff; /* Цвет фона ячейки */
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .line-item.active {
+      background-color: #cccccc; /* Цвет активной ячейки */
+    }
+    .line-main {
+      width: 470px;
+      height: 100px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="line-main">
+  <div class="line-container" id="line"></div>
+  <form id="speedForm">
+    <label for="bpmInput">Beats Per Minute (BPM):</label>
+    <input type="number" id="bpmInput" value="240" min="1" max="500">
+    <button type="submit">Update Speed</button>
+  </form>
+</div>
+
+
+
+<script>
+  let animationTimeout;
+
+  // Функция для создания линии с текстом
+  function createLineWithWords(words) {
+    const lineContainer = document.getElementById('line');
+
+    for (let i = 0; i < words.length; i++) {
+      const cell = document.createElement('div');
+      cell.className = 'line-item';
+      cell.textContent = words[i];
+      lineContainer.appendChild(cell);
+    }
+  }
+
+  // Функция для подсветки ячеек поочередно
+  function highlightCells(cells, currentIndex, interval, callback) {
+    if (currentIndex < cells.length) {
+      cells[currentIndex].classList.add('active');
+      if( currentIndex == 0) {
+        var audio = new Audio('tick.mp3');
+        audio.play();
+      }
+
+      animationTimeout = setTimeout(() => {
+        cells[currentIndex].classList.remove('active');
+        highlightCells(cells, currentIndex + 1, interval, callback);
+      }, interval);
+    } else {
+      callback(); // Вызываем колбэк после завершения подсветки всех ячеек
+    }
+  }
+
+  // Функция для обновления количества ячеек
+  function updateCellCount(newCellCount, interval) {
+    clearTimeout(animationTimeout); // Очищаем текущий таймаут, если он есть
+    const lineContainer = document.getElementById('line');
+    lineContainer.innerHTML = ''; // Очищаем текущие ячейки
+
+    // Создаем новую линию с текстом
+    const wordsArray = ['D', 'k', 'k', 'T', 'Як', 'Ду', 'Се', 'Чор', 'Панч'];
+    const slicedWords = wordsArray.slice(0, newCellCount);
+    createLineWithWords(slicedWords);
+
+    // Запускаем подсветку новых ячеек
+    const newCells = document.querySelectorAll('.line-item');
+    highlightCells(newCells, 0, interval, () => {
+      // После завершения подсветки всех ячеек, меняем количество ячеек от 5 до 9
+      const nextCellCount = Math.floor(Math.random() * 5) + 5;
+      const nextInterval = interval; // Здесь вы можете изменить интервал для следующей анимации
+      updateCellCount(nextCellCount, nextInterval);
+    });
+  }
+
+  // Обработчик отправки формы
+  document.getElementById('speedForm').addEventListener('submit', function(event) {
+    event.preventDefault();
+    const bpmInput = document.getElementById('bpmInput');
+    const newBPM = parseInt(bpmInput.value, 10);
+    if (!isNaN(newBPM)) {
+      const interval = 60000 / newBPM; // Преобразование BPM в интервал в миллисекундах
+      updateCellCount(5, interval);
+    }
+  });
+
+  // Инициализация
+  const initialCellCount = 5;
+  const initialBPM = 240;
+  const initialInterval = 60000 / initialBPM;
+  updateCellCount(initialCellCount, initialInterval);
+</script>
+
+</body>
+</html>
