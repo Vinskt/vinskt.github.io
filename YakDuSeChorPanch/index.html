@@ -38,15 +38,31 @@
       width: 470px;
       height: 100px;
     }
+
+    .debug {
+      width: 470px;
+      height: 50px;
+      border: 1px solid #ccc;
+      background-color: #fff; /* Цвет фона ячейки */
+      transition: background-color 0.3s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    .debug.active {
+      background-color: #cccccc; /* Цвет активной ячейки */
+    }
   </style>
 </head>
 <body>
 
 <div class="line-main">
+  <div class="debug" id="debug-box"></div>
   <div class="line-container" id="line"></div>
   <form id="speedForm">
     <label for="bpmInput">Beats Per Minute (BPM):</label>
-    <input type="number" id="bpmInput" value="160" min="1" max="500">
+    <input type="number" id="bpmInput" value="180" min="1" max="500">
     <button type="submit">Update Speed</button>
   </form>
 </div>
@@ -70,22 +86,27 @@
   }
 
   // Функция для подсветки ячеек поочередно
-  function highlightCells(cells, currentIndex, interval, callback) {
+  function highlightCells(cells, currentIndex, interval, dilayTime, callback) {
+    var startTime = performance.now();
     if (currentIndex < cells.length) {
       cells[currentIndex].classList.add('active');
-      if( currentIndex == 0) {
+      if( currentIndex != 0) {
         /*var audio = new Audio('tick.mp3');
         audio.play();*/
+        dilayTime = 0;
       }
 
       animationFadeout = setTimeout(() => {
         cells[currentIndex].classList.remove('active');
       }, 70);
 
+      var endTime = performance.now();
+      //var dilayTime = endTime - startTime + dilayTime;
+      console.log(interval-70-dilayTime)
       animationTimeout = setTimeout(() => {
         cells[currentIndex].classList.remove('active');
-        highlightCells(cells, currentIndex + 1, interval, callback);
-      }, interval);
+        highlightCells(cells, currentIndex + 1, interval, 0, callback);
+      }, interval-70-dilayTime);
     } else {
       callback(); // Вызываем колбэк после завершения подсветки всех ячеек
     }
@@ -93,6 +114,7 @@
 
   // Функция для обновления количества ячеек
   function updateCellCount(newCellCount, interval) {
+    var startTime = performance.now();
     clearTimeout(animationTimeout); // Очищаем текущий таймаут, если он есть
     clearTimeout(animationFadeout);
     const lineContainer = document.getElementById('line');
@@ -105,7 +127,9 @@
 
     // Запускаем подсветку новых ячеек
     const newCells = document.querySelectorAll('.line-item');
-    highlightCells(newCells, 0, interval, () => {
+    var endTime = performance.now();
+    var dilayTime = endTime - startTime;
+    highlightCells(newCells, 0, interval, dilayTime, () => {
       // После завершения подсветки всех ячеек, меняем количество ячеек от 5 до 9
       const nextCellCount = Math.floor(Math.random() * 5) + 5;
       const nextInterval = interval; // Здесь вы можете изменить интервал для следующей анимации
@@ -124,11 +148,30 @@
     }
   });
 
+  function debug(interval) {
+    item = document.querySelectorAll('.debug');
+    //console.log(interval)
+    var dilayTime = 0;
+    flashingDebug = setInterval(() => {
+        var startTime = performance.now();
+        item[0].classList.add('active');
+        setTimeout(() => {
+          item[0].classList.remove('active');
+        }, 70);
+        var endTime = performance.now();
+        dilayTime = endTime - startTime;
+        console.log("X",interval-70-dilayTime)
+      }, interval-70-dilayTime);
+
+  }
+
   // Инициализация
   const initialCellCount = 5;
-  const initialBPM = 160;
+  const initialBPM = 180;
   const initialInterval = 60000 / initialBPM;
+  console.log(initialInterval);
   updateCellCount(initialCellCount, initialInterval);
+  debug(initialInterval);
 </script>
 
 </body>

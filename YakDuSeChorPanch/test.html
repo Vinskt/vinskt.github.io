@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <style>
+
+.cell {
+  width: 50px;
+  height: 50px;
+  background-color: lightblue;
+  margin: 5px;
+  display: none; /* Изначально скрываем ячейки */
+}
+
+.cell.visible {
+  display: block !important;
+}
+
+  </style>
+  <title>Show Cells Example</title>
+</head>
+<body>
+
+<div class="cell" id="cell1"></div>
+<div class="cell" id="cell2"></div>
+<div class="cell" id="cell3"></div>
+<div class="cell" id="cell4"></div>
+<div class="cell" id="cell5"></div>
+<div class="cell" id="cell6"></div>
+<div class="cell" id="cell7"></div>
+<div class="cell" id="cell8"></div>
+<div class="cell" id="cell9"></div>
+
+<script> 
+document.addEventListener('DOMContentLoaded', function() {
+  // Получаем все элементы с классом "cell"
+  var cells = document.querySelectorAll('.cell');
+
+  // Устанавливаем таймер, чтобы показывать ячейки каждые 2 секунды
+  var intervalId = setInterval(showNextCell, 2000);
+
+  // Функция для показа следующей ячейки
+  function showNextCell() {
+    console.log("1");
+    // Находим первую скрытую ячейку и делаем её видимой
+    var hiddenCell = document.querySelector('.cell:not(.visible)');
+
+    if (hiddenCell) {
+      console.log(hiddenCell+" hidden")
+      hiddenCell.classList.add('visible');
+    } else {
+      // Если все ячейки видимы, останавливаем таймер
+      clearInterval(intervalId);
+    }
+  }
+});
+</script>
+
+</body>
+</html>
